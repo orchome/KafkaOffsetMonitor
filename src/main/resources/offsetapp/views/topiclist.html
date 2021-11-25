@@ -1,0 +1,35 @@
+<div class="page-header">
+    <h1>Please select the topic on which you wish to view consumers</h1>
+</div>
+
+<div class="alert alert-info" ng-show="loading">
+    Loading ...
+</div>
+
+<table class="table">
+    <thead>
+    <tr>
+        <th>Topic</th>
+        <th>Partition</th>
+        <th>Log-End Offset</th>
+    </tr>
+    </thead>
+
+    <tbody ng-repeat="t in topics">
+    <tr class="topic-row">
+        <td><a href="./#/topicdetail/{{t.topic}}">{{t.topic}}</a></td>
+        <td></td>
+        <td>{{t.sumLogEndOffset}}</td>
+    </tr>
+    <tr class="partition-row" ng-repeat="p in t.partitions">
+        <td></td>
+        <td>{{p.partition}}</td>
+        <td>{{p.logEndOffset}}</td>
+    </tbody>
+</table>
+
+<!--
+<ul class="list-group">
+<li ng-repeat="g in topics" class="list-group-item"><a href="./#/topicdetail/{{g}}">{{g}}</a></li>
+</ul>
+-->

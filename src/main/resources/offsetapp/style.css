@@ -1,0 +1,30 @@
+.topic-row {
+  background-color: rgb(91, 192, 222);
+  color: white;
+  border-top: 3px solid #CCC;
+}
+
+.speed {
+  margin: 25px 0;
+ }
+
+.speed .label {
+  font-size: 30px;
+ }
+
+.speed .label .small {
+  font-size: 10px;
+ }
+
+.speed .label strong {
+  margin: 0 10px;
+ }
+
+.speed .label .glyphicon {
+  margin-left: 5px;
+}
+
+.speed .label small { 
+font-size: 10px;
+color: lightblue;
+ }

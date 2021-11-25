@@ -1,0 +1,27 @@
+*~
+*.class
+*.lock
+*.DS_Store
+*.swp
+*.out
+target/
+*.iml
+*.ipr
+*.iws
+*.bak
+*.settings/
+*.classpath
+*.project
+*.metadata/
+*.idea/
+logs/
+*.log
+dependency-reduced-pom.xml
+*.jar
+oms_virtual.properties
+oms_remote.properties
+logback.xml
+
+# dependencies
+node_modules/
+package-lock.json

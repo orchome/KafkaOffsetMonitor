@@ -1,4 +1,4 @@
-package www.orchome.com.kafka;
+package www.orchome.com.kafka.core;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

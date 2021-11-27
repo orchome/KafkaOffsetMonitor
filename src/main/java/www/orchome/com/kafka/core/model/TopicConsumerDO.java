@@ -16,7 +16,7 @@ public class TopicConsumerDO {
 
     private String name;
     private TopicConsumerDO consumers;
-    private List<TopicConsumerDO> active;
+    private List<GroupDTO> active;
     private List<OffsetDO> offsets;
     private String topic;
     private String group;

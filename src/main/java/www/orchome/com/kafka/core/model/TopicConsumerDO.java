@@ -10,13 +10,10 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 public class TopicConsumerDO {
-    public TopicConsumerDO(String name) {
-        this.name = name;
-    }
-
     private String name;
     private TopicConsumerDO consumers;
     private List<GroupDTO> active;
+    private List<GroupDTO> inactive;
     private List<OffsetDO> offsets;
     private String topic;
     private String group;

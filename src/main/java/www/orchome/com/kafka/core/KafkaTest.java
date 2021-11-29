@@ -2,6 +2,7 @@ package www.orchome.com.kafka.core;
 
 import org.apache.kafka.clients.admin.ConsumerGroupDescription;
 import org.apache.kafka.clients.admin.ListOffsetsResult;
+import org.apache.kafka.clients.admin.MemberDescription;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.Node;
 import org.apache.kafka.common.TopicPartition;
@@ -11,53 +12,56 @@ import org.springframework.web.bind.annotation.RestController;
 import www.orchome.com.kafka.core.model.*;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 @RestController
 public class KafkaTest {
 
+    public KafkaAdminService service = new KafkaServiceFactory().getInstance();
+
     @GetMapping("group")
     public List<String> groups() {
-        return new KafkaAdminTest().listConsumerGroup("172.30.114.30:9092");
+        return service.listConsumerGroup();
     }
 
-    @GetMapping("group/{name}")
-    public TopicDO groupsByName(@PathVariable String name) {
+    @GetMapping("group/{groupName}")
+    public TopicDO groupsByName(@PathVariable String groupName) {
         TopicDO main = new TopicDO();
-
         // brokers
-        List<Node> nodes = new KafkaAdminTest().listBroders("172.30.114.30:9092");
-        main.setBroders(nodes);
-
-        List<OffsetDTO> offsets = new ArrayList<>();
-        Map<TopicPartition, OffsetAndMetadata> maps = new KafkaAdminTest().listConsumerGroupOffsets("172.30.114.30:9092", name);
-        Map<String, ConsumerGroupDescription> consumerDesc = new KafkaAdminTest().describeConsumer("172.30.114.30:9092", name);
-        AtomicReference<String> clientID = new AtomicReference<>("");
-        consumerDesc.get(name).members().forEach(m -> {
-            clientID.set(m.clientId() + "_" + m.host());
-        });
-        maps.forEach((key, value) -> {
-            Map<TopicPartition, ListOffsetsResult.ListOffsetsResultInfo> partitionListOffsetsResultInfoMap = new KafkaAdminTest().test("172.30.114.30:9092", key);
-            offsets.add(new OffsetDTO(name, key.topic(), key.partition(), value.offset(), partitionListOffsetsResultInfoMap.get(key).offset(), clientID.get(), null, null, null));
-        });
-        main.setOffsets(offsets);
+        main.setBroders(service.listBrokers());
+        // offsets
+        main.setOffsets(getOffset(groupName, null));
         return main;
     }
 
     public List<OffsetDTO> getOffset(String groupName, String topicName) {
+
+        Map<String, MemberDescription> topicPartitionMaps = new HashMap<>();
+        Map<String, ConsumerGroupDescription> consumerDesc = service.describeConsumer(groupName);
+        consumerDesc.get(groupName).members().forEach(m -> {
+            m.assignment().topicPartitions().forEach(k -> {
+                topicPartitionMaps.put(k.toString(), m);
+            });
+        });
+
         List<OffsetDTO> offsets = new ArrayList<>();
-        Map<TopicPartition, OffsetAndMetadata> maps = new KafkaAdminTest().listConsumerGroupOffsets("172.30.114.30:9092", groupName);
+        Map<TopicPartition, OffsetAndMetadata> maps = service.listConsumerGroupOffsets(groupName);
         maps.forEach((key, value) -> {
-            if (!key.topic().equals(topicName)) return;
-            Map<TopicPartition, ListOffsetsResult.ListOffsetsResultInfo> partitionListOffsetsResultInfoMap = new KafkaAdminTest().test("172.30.114.30:9092", key);
-            offsets.add(new OffsetDTO(groupName, key.topic(), key.partition(), value.offset(), partitionListOffsetsResultInfoMap.get(key).offset(), "", null, null, null));
+            if (topicName != null && !key.topic().equals(topicName)) return;
+            Map<TopicPartition, ListOffsetsResult.ListOffsetsResultInfo> partitionListOffsetsResultInfoMap = service.listOffsets(key);
+            String consumerId = "", clientId = "", host = "";
+            if (topicPartitionMaps.get(key.topic() + "-" + key.partition()) != null) {
+                consumerId = topicPartitionMaps.get(key.topic() + "-" + key.partition()).consumerId();
+                clientId = topicPartitionMaps.get(key.topic() + "-" + key.partition()).clientId();
+                host = topicPartitionMaps.get(key.topic() + "-" + key.partition()).host();
+            }
+            offsets.add(new OffsetDTO(groupName, key.topic(), key.partition(), value.offset(), partitionListOffsetsResultInfoMap.get(key).offset(), consumerId, host, clientId));
         });
         return offsets;
     }
 
-    @GetMapping("group/{name}/{topicName}")
-    public TopicConsumerDO groupsByName(@PathVariable String name, @PathVariable String topicName) { // todo
+    @GetMapping("group/{groupName}/{topicName}")
+    public TopicConsumerDO groupsByName(@PathVariable String groupName, @PathVariable String topicName) { // todo
         TopicConsumerDO main = new TopicConsumerDO();
         main.setTopic("topic");
         main.setGroup("myself");
@@ -65,7 +69,7 @@ public class KafkaTest {
         active.add(new GroupDTO("c2"));
 
         List<OffsetDO> offsets = new ArrayList<>();
-        for (int i = 0; i <= 1000; i++) {
+        for (int i = 0; i <= 500; i++) {
             offsets.add(new OffsetDO(null, null, "0", i, 1200 + i, null, null, null, t((1000 - i)).getTime()));
             offsets.add(new OffsetDO(null, null, "1", i, 1 + i, null, null, null, t((1000 - i)).getTime()));
         }
@@ -86,82 +90,71 @@ public class KafkaTest {
     /**
      * 1. 活跃的消费者（某个主题的）
      * 2. 消费者明细
-     *
-     * @param topicName
-     * @return
      */
     @GetMapping("topic/{topicName}/consumer")
     public TopicConsumerDO topic(@PathVariable String topicName) {
         TopicConsumerDO main = new TopicConsumerDO();
-        List<GroupDTO> active = new ArrayList<>();
         TopicConsumerDO consumers = new TopicConsumerDO();
 
-        // topic下的活跃的group
-        List<String> _groups = new KafkaAdminTest().activeConsumerByTopic("172.30.114.30:9092", topicName);
-        List<GroupDTO> groups = _groups.stream().map(g -> new GroupDTO(g)).collect(Collectors.toList());
+        List<GroupDTO> active = new ArrayList<>();
+        List<GroupDTO> inactive = new ArrayList<>();
 
-        groups.forEach(c -> {
-                    c.setOffsets(getOffset(c.getName(), topicName));
-                    active.add(c);
-                }
-        );
+        // 活跃的
+        List<GroupDTO> actionG = service.activeConsumerByTopic(topicName).stream().map(g -> new GroupDTO(g)).collect(Collectors.toList());
+        actionG.forEach(c -> {
+            c.setOffsets(getOffset(c.getName(), topicName));
+            active.add(c);
+        });
+
+        // 不活跃
+        List<GroupDTO> inactionG = service.inactiveConsumerByTopic(topicName).stream().map(g -> new GroupDTO(g)).collect(Collectors.toList());
+        inactionG.forEach(c -> {
+            c.setOffsets(getOffset(c.getName(), topicName));
+            inactive.add(c);
+        });
+
         consumers.setActive(active);
+        consumers.setInactive(inactive);
         main.setConsumers(consumers);
         return main;
     }
 
     @GetMapping("topiclist")
     public Set<String> topiclist() {
-        return new KafkaAdminTest().listTopics("172.30.114.30:9092");
+        return service.listTopics();
     }
 
     @GetMapping("topicdetails/{topicName}")
-    public TopicDTO topicdetails(@PathVariable String topicName) {
+    public TopicDTO topicDetails(@PathVariable String topicName) {
         TopicDTO main = new TopicDTO();
-        List<String> _groups = new KafkaAdminTest().activeConsumerByTopic("172.30.114.30:9092", topicName);
-        List<GroupDTO> groups = _groups.stream().map(g -> new GroupDTO(g)).collect(Collectors.toList());
+        List<GroupDTO> groups = service.activeConsumerByTopic(topicName).stream().map(g -> new GroupDTO(g)).collect(Collectors.toList());
         main.setConsumers(groups);
         return main;
     }
 
     @GetMapping("activetopics")
-    public TopicDO activetopics() {
-        TopicDO main = new TopicDO();
-        main.setName("ActiveTopics");
-
-        TopicDO t1 = new TopicDO();
-        t1.setName("t1");
-
-        TopicDO t2 = new TopicDO();
-        t2.setName("t2");
-
-        TopicDO c1 = new TopicDO();
-        c1.setName("c1");
-
-        TopicDO c2 = new TopicDO();
-        c2.setName("c2");
-
-        List<TopicDO> list = new ArrayList<>();
-        list.add(t1);
-        list.add(t2);
-
-        List<TopicDO> lists = new ArrayList<>();
-        lists.add(c1);
-        lists.add(c2);
-        t1.setChildren(lists);
-        t2.setChildren(lists);
-
-        main.setChildren(list);
+    public TreeRootDTO activetopics() {
+        TreeRootDTO main = new TreeRootDTO("ActiveTopics");
+        List<TreeNodeDTO> topicList = new ArrayList<>();
+        service.listTopics().forEach(t -> {
+            TreeNodeDTO topicDO = new TreeNodeDTO(t);
+            topicDO.setChildren(service.activeConsumerByTopic(t).stream().map(c -> new TreeNodeDTO(c)).collect(Collectors.toList()));
+            topicList.add(topicDO);
+        });
+        main.setChildren(topicList);
         return main;
     }
 
     @GetMapping("clusterlist")
     public TreeRootDTO clusterlist() {
+
+        List<Node> nodes = service.listBrokers();
+
+        // convert to a tree structure
         TreeRootDTO root = new TreeRootDTO("KafkaCluster");
-        List<TreeNodeDTO> list = new ArrayList<>();
-        List<Node> nodes = new KafkaAdminTest().listBroders("172.30.114.30:9092");
-        nodes.forEach(node -> list.add(new TreeNodeDTO(node.host() + ":" + node.port())));
-        root.setChildren(list);
+        List<TreeNodeDTO> treeNode = new ArrayList<>();
+        nodes.forEach(node -> treeNode.add(new TreeNodeDTO(node.host() + ":" + node.port())));
+        root.setChildren(treeNode);
         return root;
     }
 }

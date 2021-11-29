@@ -16,7 +16,9 @@ public class OffsetDTO {
     private Long offset;
     private Long logSize;
     private String owner;
-    private Date creation;
-    private Date modified;
-    private Long timestamp;
+    private String ip;
+    private String clientId;
+//    private Date creation;
+//    private Date modified;
+//    private Long timestamp;
 }

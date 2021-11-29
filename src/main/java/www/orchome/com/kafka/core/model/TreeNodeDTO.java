@@ -3,13 +3,17 @@ package www.orchome.com.kafka.core.model;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 public class TreeNodeDTO {
-    public String name;
-    public String children;
 
     public TreeNodeDTO(String name) {
         this.name = name;
     }
+
+    public String name;
+    public List<TreeNodeDTO> children;
+
 }

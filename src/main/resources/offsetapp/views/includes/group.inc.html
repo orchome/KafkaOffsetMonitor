@@ -7,9 +7,9 @@
     <th>Offset</th>
     <th>logSize</th>
     <th>Lag</th>
+    <th>clientId</th>
+    <th>ip</th>
     <th>Owner</th>
-    <th>Created</th>
-    <th>Last Seen</th>
   </tr>
   </thead>
   <tbody ng-repeat="c in info.offsets">
@@ -39,9 +39,11 @@
     <td>{{p.offset}}</td>
     <td>{{p.logSize}}</td>
     <td>{{p.logSize - p.offset}}</td>
+    <td>{{p.clientId}}</td>
+    <td>{{p.ip}}</td>
     <td>{{p.owner}}</td>
-    <td><moment timestamp="{{p.creation}}"></moment></td>
-    <td><moment timestamp="{{p.modified}}"></moment></td>
+    <!--    <td><moment timestamp="{{p.creation}}"></moment></td>-->
+<!--    <td><moment timestamp="{{p.modified}}"></moment></td>-->
   </tr>
   </tbody>
 </table>

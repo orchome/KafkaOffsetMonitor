@@ -1,4 +1,4 @@
-package www.orchome.com.kafka.core.model;
+package www.orchome.com.kafka.model;
 
 import lombok.Getter;
 import lombok.Setter;

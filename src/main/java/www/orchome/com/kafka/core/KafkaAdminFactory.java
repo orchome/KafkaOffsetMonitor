@@ -7,7 +7,7 @@ import java.util.Properties;
 public class KafkaAdminFactory {
 
     public static AdminClient getInstance() {
-        return getInstance("172.30.114.30:9092");
+        return getInstance(System.getProperty("--broker-list"));
     }
 
     public static AdminClient getInstance(String bootstrapServers) {
@@ -17,5 +17,4 @@ public class KafkaAdminFactory {
         properties.put("request.timeout.ms", 5000);
         return AdminClient.create(properties);
     }
-
 }

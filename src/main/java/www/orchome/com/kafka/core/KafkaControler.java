@@ -9,15 +9,15 @@ import org.apache.kafka.common.TopicPartition;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
-import www.orchome.com.kafka.core.model.*;
+import www.orchome.com.kafka.model.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
-public class KafkaTest {
+public class KafkaControler {
 
-    public KafkaAdminService service = new KafkaServiceFactory().getInstance();
+    public KafkaService service = new KafkaServiceFactory().getInstance();
 
     @GetMapping("group")
     public List<String> groups() {
@@ -25,10 +25,10 @@ public class KafkaTest {
     }
 
     @GetMapping("group/{groupName}")
-    public TopicDO groupsByName(@PathVariable String groupName) {
-        TopicDO main = new TopicDO();
+    public GroupDTO groupsByName(@PathVariable String groupName) {
+        GroupDTO main = new GroupDTO();
         // brokers
-        main.setBroders(service.listBrokers());
+        main.setBrokers(service.listBrokers());
         // offsets
         main.setOffsets(getOffset(groupName, null));
         return main;
@@ -60,37 +60,34 @@ public class KafkaTest {
         return offsets;
     }
 
-    @GetMapping("group/{groupName}/{topicName}")
-    public TopicConsumerDO groupsByName(@PathVariable String groupName, @PathVariable String topicName) { // todo
-        TopicConsumerDO main = new TopicConsumerDO();
-        main.setTopic("topic");
-        main.setGroup("myself");
-        List<GroupDTO> active = new ArrayList<>();
-        active.add(new GroupDTO("c2"));
+//    @GetMapping("group/{groupName}/{topicName}")
+//    public TopicConsumerDO groupsByName(@PathVariable String groupName, @PathVariable String topicName) { // todo
+//        TopicConsumerDO main = new TopicConsumerDO();
+//        main.setTopic("topic");
+//        main.setGroup("myself");
+//        List<GroupDTO> active = new ArrayList<>();
+//        active.add(new GroupDTO("c2"));
+//
+//        List<OffsetDO> offsets = new ArrayList<>();
+//        for (int i = 0; i <= 500; i++) {
+//            offsets.add(new OffsetDO(null, null, "0", i, 1200 + i, null, null, null, t((1000 - i)).getTime()));
+//            offsets.add(new OffsetDO(null, null, "1", i, 1 + i, null, null, null, t((1000 - i)).getTime()));
+//        }
+//        main.setOffsets(offsets);
+//        main.setActive(active);
+//        return main;
+//    }
+//
+//    public Date date(int second) {
+//        Date date = new Date();
+//        Calendar c = Calendar.getInstance();
+//        c.setTime(date);
+//        c.add(Calendar.SECOND, -second);
+//        date = c.getTime();
+//        return date;
+//    }
 
-        List<OffsetDO> offsets = new ArrayList<>();
-        for (int i = 0; i <= 500; i++) {
-            offsets.add(new OffsetDO(null, null, "0", i, 1200 + i, null, null, null, t((1000 - i)).getTime()));
-            offsets.add(new OffsetDO(null, null, "1", i, 1 + i, null, null, null, t((1000 - i)).getTime()));
-        }
-        main.setOffsets(offsets);
-        main.setActive(active);
-        return main;
-    }
 
-    public Date t(int second) {
-        Date date = new Date();
-        Calendar c = Calendar.getInstance();
-        c.setTime(date);
-        c.add(Calendar.SECOND, -second);
-        date = c.getTime();
-        return date;
-    }
-
-    /**
-     * 1. 活跃的消费者（某个主题的）
-     * 2. 消费者明细
-     */
     @GetMapping("topic/{topicName}/consumer")
     public TopicConsumerDO topic(@PathVariable String topicName) {
         TopicConsumerDO main = new TopicConsumerDO();
@@ -99,14 +96,14 @@ public class KafkaTest {
         List<GroupDTO> active = new ArrayList<>();
         List<GroupDTO> inactive = new ArrayList<>();
 
-        // 活跃的
+        // active
         List<GroupDTO> actionG = service.activeConsumerByTopic(topicName).stream().map(g -> new GroupDTO(g)).collect(Collectors.toList());
         actionG.forEach(c -> {
             c.setOffsets(getOffset(c.getName(), topicName));
             active.add(c);
         });
 
-        // 不活跃
+        // inactive
         List<GroupDTO> inactionG = service.inactiveConsumerByTopic(topicName).stream().map(g -> new GroupDTO(g)).collect(Collectors.toList());
         inactionG.forEach(c -> {
             c.setOffsets(getOffset(c.getName(), topicName));
@@ -137,9 +134,9 @@ public class KafkaTest {
         TreeRootDTO main = new TreeRootDTO("ActiveTopics");
         List<TreeNodeDTO> topicList = new ArrayList<>();
         service.listTopics().forEach(t -> {
-            TreeNodeDTO topicDO = new TreeNodeDTO(t);
-            topicDO.setChildren(service.activeConsumerByTopic(t).stream().map(c -> new TreeNodeDTO(c)).collect(Collectors.toList()));
-            topicList.add(topicDO);
+            TreeNodeDTO treeNodeDTO = new TreeNodeDTO(t);
+            treeNodeDTO.setChildren(service.activeConsumerByTopic(t).stream().map(c -> new TreeNodeDTO(c)).collect(Collectors.toList()));
+            topicList.add(treeNodeDTO);
         });
         main.setChildren(topicList);
         return main;
@@ -147,9 +144,7 @@ public class KafkaTest {
 
     @GetMapping("clusterlist")
     public TreeRootDTO clusterlist() {
-
         List<Node> nodes = service.listBrokers();
-
         // convert to a tree structure
         TreeRootDTO root = new TreeRootDTO("KafkaCluster");
         List<TreeNodeDTO> treeNode = new ArrayList<>();

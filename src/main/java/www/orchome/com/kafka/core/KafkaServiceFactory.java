@@ -2,8 +2,8 @@ package www.orchome.com.kafka.core;
 
 public class KafkaServiceFactory {
 
-    public static KafkaAdminService getInstance() {
-        return new KafkaAdminService();
+    public static KafkaService getInstance() {
+        return new KafkaService();
     }
 
 }

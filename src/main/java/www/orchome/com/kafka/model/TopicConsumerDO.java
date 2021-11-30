@@ -1,4 +1,4 @@
-package www.orchome.com.kafka.core.model;
+package www.orchome.com.kafka.model;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,7 +14,6 @@ public class TopicConsumerDO {
     private TopicConsumerDO consumers;
     private List<GroupDTO> active;
     private List<GroupDTO> inactive;
-    private List<OffsetDO> offsets;
     private String topic;
     private String group;
 }

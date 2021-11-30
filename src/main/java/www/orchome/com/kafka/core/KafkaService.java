@@ -1,7 +1,6 @@
 package www.orchome.com.kafka.core;
 
 import org.apache.kafka.clients.admin.*;
-
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.Node;
 import org.apache.kafka.common.TopicPartition;
@@ -12,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
-public class KafkaAdminService {
+public class KafkaService {
 
     public List<String> listConsumerGroup() {
         try (AdminClient client = KafkaAdminFactory.getInstance()) {
@@ -66,33 +65,10 @@ public class KafkaAdminService {
         }
     }
 
-    public List<Map.Entry<TopicPartition, OffsetAndMetadata>> listPartition(String bootstrapServers, String group) {
-        Properties properties = new Properties();
-        properties.put("bootstrap.servers", bootstrapServers);
-        properties.put("connections.max.idle.ms", 10000);
-        properties.put("request.timeout.ms", 5000);
-
-        try (AdminClient client = AdminClient.create(properties)) {
-            try {
-                Collection<TopicPartition> partitions = new ArrayList<>();
-                TopicPartition topicPartition = new TopicPartition("test3", 0);
-                partitions.add(topicPartition);
-                client.listPartitionReassignments();
-                DescribeProducersResult rs = client.describeProducers(partitions);
-                return null;
-            } catch (Exception e) {
-                throw new IllegalStateException(e);
-            }
-        }
-    }
-
     public Set<String> listTopics() {
         try (AdminClient client = KafkaAdminFactory.getInstance()) {
             ListTopicsResult result = client.listTopics();
             try {
-                result.listings().get().forEach(topic -> {
-                    System.out.println(topic);
-                });
                 return result.names().get();
             } catch (InterruptedException | ExecutionException e) {
                 throw new IllegalStateException(e);

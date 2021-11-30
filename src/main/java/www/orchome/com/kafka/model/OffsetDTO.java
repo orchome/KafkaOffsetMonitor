@@ -1,10 +1,8 @@
-package www.orchome.com.kafka.core.model;
+package www.orchome.com.kafka.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.Date;
 
 @Getter
 @Setter

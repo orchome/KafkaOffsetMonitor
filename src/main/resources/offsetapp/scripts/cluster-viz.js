@@ -148,7 +148,7 @@ function load_viz_page(d) {
     if(d.parent != undefined) {
         parent = d.parent.name;
         if(parent != undefined && parent != "ActiveTopics" && parent != "KafkaCluster") {
-            window.location.replace("./#/group/"+ name + "/" + parent);
+            // window.location.replace("./#/group/"+ name + "/" + parent);
         }
     }
 }

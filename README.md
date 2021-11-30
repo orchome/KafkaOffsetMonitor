@@ -28,6 +28,10 @@ The command below will build a fat-jar in the target/scala_${SCALA_VERSION} dire
 mvn -Dmaven.test.skip=true -U package
 ```
 
+Download It
+===========
+<a href="https://www.orchome.com/file/KafkaOffsetMonitor-1.0.jar.zip" rel="nofollow">KafkaOffsetMonitor-1.0.jar.zip</a>
+
 Running It
 ===========
 

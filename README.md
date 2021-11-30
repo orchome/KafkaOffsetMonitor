@@ -12,12 +12,12 @@ Here are a few screenshots:
 List of Consumer Groups
 -----------------------
 
-![Consumer Groups](https://github.com/orchome/KafkaOffsetMonitor/img/groups.png)
+![Consumer Groups](https://github.com/orchome/KafkaOffsetMonitor/blob/main/img/topics.png)
 
 List of Topics for a Group
 --------------------------
 
-![Topic List](https://github.com/orchome/KafkaOffsetMonitor/img/topics.png)
+![Topic List](https://github.com/orchome/KafkaOffsetMonitor/blob/main/img/topics.png)
 
 Building It
 ===========

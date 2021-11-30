@@ -12,7 +12,7 @@ Here are a few screenshots:
 List of Consumer Groups
 -----------------------
 
-![Consumer Groups](https://github.com/orchome/KafkaOffsetMonitor/blob/main/img/topics.png)
+![Consumer Groups](https://github.com/orchome/KafkaOffsetMonitor/blob/main/img/groups.png)
 
 List of Topics for a Group
 --------------------------

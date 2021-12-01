@@ -19,6 +19,11 @@ List of Topics for a Group
 
 ![Topic List](https://github.com/orchome/KafkaOffsetMonitor/blob/main/img/topics.png)
 
+Supported Kafka version
+===========
+
+- kafka raft >= 2.8
+
 Building It
 ===========
 

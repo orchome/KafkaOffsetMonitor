@@ -35,7 +35,10 @@ mvn -Dmaven.test.skip=true -U package
 
 Download It
 ===========
-<a href="https://www.orchome.com/file/KafkaOffsetMonitor-1.0.jar.zip" rel="nofollow">KafkaOffsetMonitor-1.0.jar.zip</a>
+
+Version  |  Zip
+-------  |  ---- |
+1.0.0    | [KafkaOffsetMonitor](https://www.orchome.com/dist/kafka-offset-monitor/1.0.0/KafkaOffsetMonitor.zip)
 
 Running It
 ===========

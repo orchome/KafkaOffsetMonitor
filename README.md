@@ -56,6 +56,13 @@ The arguments are:
 - **broker-list** comma-separated list of Kafka broker hosts (ex. "host1:port,host2:port').  Required only when using offsetStorage "kafka".
 - **server.port** the port on which the app will be made available
 
+Kubernetes
+============
+```
+kubectl apply -f https://www.kubebiz.com/raw/KubeBiz/KafkaOffsetMonitor/1.0.0/Deployment.yaml
+```
+more ref: https://www.kubebiz.com/orc/KafkaOffsetMonitor
+
 Contributing
 ============
 

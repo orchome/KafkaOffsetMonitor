@@ -58,6 +58,7 @@ The arguments are:
 
 Kubernetes
 ============
+
 ```
 kubectl apply -f https://www.kubebiz.com/raw/KubeBiz/KafkaOffsetMonitor/1.0.0/Deployment.yaml
 ```
